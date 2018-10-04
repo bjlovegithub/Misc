@@ -1,4 +1,5 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/")
+(add-to-list 'exec-path "/usr/local/bin/")
 
 (setq current-language-environment "UTF-8")
 (setq default-input-method "chinese-py")
@@ -63,6 +64,10 @@
 (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
 
+;; auto completion
+(require 'company)
+(global-company-mode)    
+
 ;; helm
 (require 'helm)
 (require 'helm-config)
@@ -72,7 +77,9 @@
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(package-selected-packages (quote (helm js2-mode))))
+ '(package-selected-packages
+   (quote
+    (company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -83,9 +90,9 @@
 ;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
 ;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
 (global-set-key (kbd "C-c h") 'helm-command-prefix)
+(global-set-key (kbd "C-x C-f") 'helm-find-files)
 (global-unset-key (kbd "C-x c"))
 
-(define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action) ; rebind tab to run persistent action
 (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
 (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
 
@@ -117,6 +124,13 @@
 (setq helm-autoresize-min-height 20)
 (helm-autoresize-mode 1)
 
+(projectile-mode +1)
+(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+(projectile-global-mode)
+(setq projectile-completion-system 'helm)
+(helm-projectile-on)
+
 ;; javascript
 (require 'js2-mode)
 (add-hook 'js2-mode-hook 'ac-js2-mode)
@@ -125,3 +139,7 @@
 (add-to-list 'interpreter-mode-alist '("node" . js2-jsx-mode))
 
 ;; Ruby
+(add-hook 'ruby-mode-hook 'ruby-electric-mode)
+(add-hook 'ruby-mode-hook 'robe-mode)
+(eval-after-load 'company
+  '(push 'company-robe company-backends))
