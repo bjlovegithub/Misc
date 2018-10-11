@@ -79,7 +79,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
+    (yaml-mode company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -90,7 +90,6 @@
 ;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
 ;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
 (global-set-key (kbd "C-c h") 'helm-command-prefix)
-(global-set-key (kbd "C-x C-f") 'helm-find-files)
 (global-unset-key (kbd "C-x c"))
 
 (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
@@ -140,6 +139,6 @@
 
 ;; Ruby
 (add-hook 'ruby-mode-hook 'ruby-electric-mode)
-(add-hook 'ruby-mode-hook 'robe-mode)
-(eval-after-load 'company
-  '(push 'company-robe company-backends))
+
+(require 'yaml-mode)
+(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
