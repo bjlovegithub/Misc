@@ -1,5 +1,6 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/")
 (add-to-list 'exec-path "/usr/local/bin/")
+(exec-path-from-shell-initialize)
 
 (setq current-language-environment "UTF-8")
 (setq default-input-method "chinese-py")
@@ -78,8 +79,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (yaml-mode company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
+    (quote
+     (exec-path-from-shell rubocop yaml-mode company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -142,3 +143,6 @@
 
 (require 'yaml-mode)
 (add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+
+(require 'rubocop)
+(add-hook 'ruby-mode-hook 'rubocop-mode)
