@@ -95,6 +95,7 @@
 
 (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
 (define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
+(define-key helm-find-files-map "\t" 'helm-execute-persistent-action)
 
 (when (executable-find "curl")
   (setq helm-google-suggest-use-curl-p t))
