@@ -1,7 +1,5 @@
 (add-to-list 'load-path "~/.emacs.d/lisp/")
-(add-to-list 'exec-path "/usr/local/bin/")
-(exec-path-from-shell-initialize)
-
+    
 (setq current-language-environment "UTF-8")
 (setq default-input-method "chinese-py")
 (setq locale-coding-system 'utf-8)
@@ -11,7 +9,7 @@
 (prefer-coding-system 'utf-8)
 
 (autoload 'dired-jump "dired-x"
-"Jump to Dired buffer corresponding to current buffer." t)
+  "Jump to Dired buffer corresponding to current buffer." t)
 
 (fset 'yes-or-no-p 'y-or-n-p)
 (iswitchb-mode 1)
@@ -33,6 +31,8 @@
 
 (define-key global-map (kbd "RET") 'newline-and-indent)
 (define-key global-map (kbd "C-j") 'newline-and-indent)
+
+
 ;; Set cursor and mouse-pointer colours
 ;(set-cursor-color "green")
 ;(set-mouse-color "green")
@@ -48,89 +48,76 @@
 
 (setq js-indent-level 2)
 
-(setq mweb-default-major-mode 'html-mode)
-(setq mweb-tags '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
-(js-mode "]*>" "")
-(css-mode "<style +type=\"text/css\"[^>]*>" "</style>")))
-(setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5"))
+;; INSTALL PACKAGES
+;; --------------------------------------
+
 (require 'package)
 (let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-(not (gnutls-available-p))))
-(proto (if no-ssl "http" "https")))
-;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-(add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
-(when (< emacs-major-version 24)
-;; For important compatibility libraries like cl-lib
-(add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+                    (not (gnutls-available-p))))
+       (proto (if no-ssl "http" "https")))
+  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
+  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
+  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
+  (when (< emacs-major-version 24)
+    ;; For important compatibility libraries like cl-lib
+    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
 (package-initialize)
 
-;; auto completion
-(require 'company)
-(global-company-mode)    
 
-;; helm
-(require 'helm)
-(require 'helm-config)
-(helm-mode 1)
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-    (quote
-     (exec-path-from-shell rubocop yaml-mode company robe helm-robe helm-dash ruby-electric helm-ag helm-projectile helm js2-mode))))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-;; The default "C-x c" is quite close to "C-x C-c", which quits Emacs.
-;; Changed to "C-c h". Note: We must set "C-c h" globally, because we
-;; cannot change `helm-command-prefix-key' once `helm-config' is loaded.
-(global-set-key (kbd "C-c h") 'helm-command-prefix)
-(global-unset-key (kbd "C-x c"))
+(package-initialize)
+(when (not package-archive-contents)
+  (package-refresh-contents))
 
-(define-key helm-map (kbd "C-i") 'helm-execute-persistent-action) ; make TAB work in terminal
-(define-key helm-map (kbd "C-z")  'helm-select-action) ; list actions using C-z
-(define-key helm-find-files-map "\t" 'helm-execute-persistent-action)
+(defvar myPackages
+  '(ein
+    ;;elpy
+    jedi
+    flycheck
+    ;;material-theme
+    yasnippet
+    yasnippet-snippets
+    py-autopep8
+    multi-web-mode
+    js2-mode
+    js2-refactor
+    xref-js2
+    company
+    company-tern
+    exec-path-from-shell))
 
-(when (executable-find "curl")
-  (setq helm-google-suggest-use-curl-p t))
+(mapc #'(lambda (package)
+    (unless (package-installed-p package)
+      (package-install package)))
+      myPackages)
 
-(setq helm-split-window-in-side-p           t ; open helm buffer inside current window, not occupy whole other window
-      helm-move-to-line-cycle-in-source     t ; move to end or beginning of source when reaching top or bottom of source.
-      helm-ff-search-library-in-sexp        t ; search for library in `require' and `declare-function' sexp.
-      helm-scroll-amount                    8 ; scroll 8 lines other window using M-<next>/M-<prior>
-      helm-ff-file-name-history-use-recentf t
-      helm-echo-input-in-header-line t)
+;; BASIC CUSTOMIZATION
+;; --------------------------------------
 
-(defun spacemacs//helm-hide-minibuffer-maybe ()
-  "Hide minibuffer in Helm session if we use the header line as input field."
-  (when (with-helm-buffer helm-echo-input-in-header-line)
-    (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
-      (overlay-put ov 'window (selected-window))
-      (overlay-put ov 'face
-                   (let ((bg-color (face-background 'default nil)))
-                     `(:background ,bg-color :foreground ,bg-color)))
-      (setq-local cursor-type nil))))
+(setq inhibit-startup-message t) ;; hide the startup message
+;;(load-theme 'material t) ;; load material theme
+(global-linum-mode t) ;; enable line numbers globally
 
+;; PYTHON CONFIGURATION
+;; --------------------------------------
 
-(add-hook 'helm-minibuffer-set-up-hook
-          'spacemacs//helm-hide-minibuffer-maybe)
+(elpy-enable)
 
-(setq helm-autoresize-max-height 0)
-(setq helm-autoresize-min-height 20)
-(helm-autoresize-mode 1)
+;; use flycheck not flymake with elpy
+(when (require 'flycheck nil t)
+  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+  (add-hook 'elpy-mode-hook 'flycheck-mode))
 
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "s-p") 'projectile-command-map)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(projectile-global-mode)
-(setq projectile-completion-system 'helm)
-(helm-projectile-on)
+;; enable autopep8 formatting on save
+(require 'py-autopep8)
+(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+
+(require 'multi-web-mode)
+(setq mweb-default-major-mode 'html-mode)
+(setq mweb-tags '((php-mode "<\\?php\\|<\\? \\|<\\?=" "\\?>")
+                  (js-mode "<script +\\(type=\"text/javascript\"\\|language=\"javascript\"\\)[^>]*>" "</script>")
+                  (css-mode "<style +type=\"text/css\"[^>]*>" "</style>")))
+(setq mweb-filename-extensions '("php" "htm" "html" "ctp" "phtml" "php4" "php5"))
+(multi-web-global-mode 1)
 
 ;; javascript
 (require 'js2-mode)
@@ -139,11 +126,70 @@
 (add-to-list 'auto-mode-alist '("\\.jsx?\\'" . js2-jsx-mode))
 (add-to-list 'interpreter-mode-alist '("node" . js2-jsx-mode))
 
-;; Ruby
-(add-hook 'ruby-mode-hook 'ruby-electric-mode)
+(require 'js2-refactor)
+(require 'xref-js2)
+(add-hook 'js2-mode-hook #'js2-refactor-mode)
+(js2r-add-keybindings-with-prefix "C-c C-r")
+(define-key js-mode-map (kbd "M-.") nil)
+(add-hook 'js2-mode-hook (lambda ()
+                           (add-hook 'xref-backend-functions #'xref-js2-xref-backend nil t)))
 
-(require 'yaml-mode)
-(add-to-list 'auto-mode-alist '("\\.yml\\'" . yaml-mode))
+(require 'company)
+(require 'company-tern)
+(add-to-list 'company-backends 'company-tern)
+(add-hook 'js2-mode-hook (lambda ()
+                           (tern-mode)
+                           (company-mode)))
 
-(require 'rubocop)
-(add-hook 'ruby-mode-hook 'rubocop-mode)
+;; ;; misc
+;; ; have the same path conf from shell
+;;(require 'exec-path-from-shell)
+;;(exec-path-from-shell-initialize)
+;;(custom-set-variables
+;;  ;; custom-set-variables was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;; '(package-selected-packages
+;;   (quote
+;;    (dockerfile-mode docker markdown-preview-mode markdown-mode yaml-mode terraform-mode go-autocomplete auto-complete go-mode company-tern xref-js2 rjsx-mode js2-refactor exec-path-from-shell ac-js2))))
+;;(custom-set-faces
+;;  ;; custom-set-faces was added by Custom.
+;;  ;; If you edit it by hand, you could mess it up, so be careful.
+;;  ;; Your init file should contain only one such instance.
+;;  ;; If there is more than one, they won't work right.
+;; )
+
+;; (cl-old-struct-compat-mode 1)
+
+;; (add-hook 'before-save-hook 'gofmt-before-save)
+
+;; (defun auto-complete-for-go ()
+;;   (auto-complete-mode 1))
+;; (add-hook 'go-mode-hook 'auto-complete-for-go)
+
+;; (with-eval-after-load 'go-mode
+;;    (require 'go-autocomplete))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+;; remember to run Run M-x jedi:install-server RET during installation.
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+;; yasnippet
+(require 'yasnippet)
+(yas-global-mode 1)
