@@ -7,6 +7,8 @@
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
+(set-face-attribute 'default nil
+                    :height 145 :weight 'normal)
 
 (autoload 'dired-jump "dired-x"
   "Jump to Dired buffer corresponding to current buffer." t)
@@ -52,19 +54,11 @@
 ;; --------------------------------------
 
 (require 'package)
-(let* ((no-ssl (and (memq system-type '(windows-nt ms-dos))
-                    (not (gnutls-available-p))))
-       (proto (if no-ssl "http" "https")))
-  ;; Comment/uncomment these two lines to enable/disable MELPA and MELPA Stable as desired
-  (add-to-list 'package-archives (cons "melpa" (concat proto "://melpa.org/packages/")) t)
-  ;;(add-to-list 'package-archives (cons "melpa-stable" (concat proto "://stable.melpa.org/packages/")) t)
-  (when (< emacs-major-version 24)
-    ;; For important compatibility libraries like cl-lib
-    (add-to-list 'package-archives '("gnu" . (concat proto "://elpa.gnu.org/packages/")))))
+(setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
+                         ("melpa" . "https://melpa.org/packages/")
+                         ("org" . "http://orgmode.org/elpa/")))
 (package-initialize)
 
-
-(package-initialize)
 (when (not package-archive-contents)
   (package-refresh-contents))
 
@@ -83,6 +77,12 @@
     xref-js2
     company
     company-tern
+    magit
+    flymake
+    lsp-mode
+    company-lsp
+    lsp-ui
+    lsp-java
     exec-path-from-shell))
 
 (mapc #'(lambda (package)
@@ -143,8 +143,9 @@
 
 ;; ;; misc
 ;; ; have the same path conf from shell
-;;(require 'exec-path-from-shell)
-;;(exec-path-from-shell-initialize)
+(require 'exec-path-from-shell)
+(exec-path-from-shell-initialize)
+
 ;;(custom-set-variables
 ;;  ;; custom-set-variables was added by Custom.
 ;;  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -177,7 +178,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+    (lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -193,3 +194,13 @@
 ;; yasnippet
 (require 'yasnippet)
 (yas-global-mode 1)
+
+(require 'lsp-mode)
+(require 'lsp-clients)
+;; pip install python-language-server to get the server
+(add-hook 'python-mode-hook #'lsp)
+(add-hook 'java-mode-hook #'lsp)
+(add-hook 'java-mode-hook 'flycheck-mode)
+(add-hook 'java-mode-hook 'company-mode)
+(require 'company-lsp)
+(push 'company-lsp company-backends)
