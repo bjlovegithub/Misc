@@ -8,7 +8,7 @@
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-face-attribute 'default nil
-                    :height 145 :weight 'normal)
+                    :height 125 :weight 'normal)
 
 (autoload 'dired-jump "dired-x"
   "Jump to Dired buffer corresponding to current buffer." t)
@@ -121,6 +121,8 @@
     helm-lsp
     use-package
     projectile
+    scala-mode
+    sbt-mode
     helm-projectile
     dockerfile-mode
     exec-path-from-shell))
@@ -217,8 +219,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-    (quote
-     (dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+   (quote
+    (dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -331,3 +333,29 @@
 )
 (require 'helm-projectile)
 (helm-projectile-on)
+
+
+;;; https://scalameta.org/metals/docs/editors/emacs.html
+;; NOTE: Delete ensime package in .emacs.d to enable metals for scala.
+(use-package scala-mode
+  :interpreter
+    ("scala" . scala-mode))
+(use-package lsp-mode
+  ;; Optional - enable lsp-mode automatically in scala files
+  :hook (scala-mode . lsp)
+  :config (setq lsp-prefer-flymake nil))
+(use-package lsp-ui)
+(use-package company-lsp)
+
+(use-package sbt-mode
+  :commands sbt-start sbt-command
+  :config
+  ;; WORKAROUND: https://github.com/ensime/emacs-sbt-mode/issues/31
+  ;; allows using SPACE when in the minibuffer
+  (substitute-key-definition
+   'minibuffer-complete-word
+   'self-insert-command
+   minibuffer-local-completion-map)
+   ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
+   (setq sbt:program-options '("-Dsbt.supershell=false"))
+)
