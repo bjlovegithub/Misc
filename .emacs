@@ -1,3 +1,6 @@
+;; ------------
+;; Global conf
+;; ------------       
 (add-to-list 'load-path "~/.emacs.d/lisp/")
     
 (setq current-language-environment "UTF-8")
@@ -50,6 +53,9 @@
 
 (setq js-indent-level 2)
 
+(setq gc-cons-threshold (eval-when-compile (* 1024 1024 1024)))
+(run-with-idle-timer 2 t (lambda () (garbage-collect)))
+
 ;; jump back and forward shortcut keys.
 (defun marker-is-point-p (marker)
   "test if marker is current point"
@@ -84,8 +90,14 @@
 (global-set-key [M-s-left] (quote backward-global-mark))
 (global-set-key [M-s-right] (quote forward-global-mark))
 
+;; enable autopair in all buffers
+(require 'autopair)
+(autopair-global-mode)
+
+;;    
 ;; INSTALL PACKAGES
 ;; --------------------------------------
+;;    
 
 (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
@@ -125,6 +137,7 @@
     sbt-mode
     helm-projectile
     dockerfile-mode
+    autopair
     exec-path-from-shell))
 
 (mapc #'(lambda (package)
@@ -288,6 +301,7 @@
         ("t" lsp-goto-type-definition "Type definition")
         ("i" lsp-goto-implementation "Implementation")
         ("f" helm-imenu "Filter funcs/classes (Helm)")
+        ("s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
         ("C-c" lsp-describe-session "Describe session")
 
         ;; Flycheck
@@ -359,3 +373,11 @@
    ;; sbt-supershell kills sbt-mode:  https://github.com/hvesalai/emacs-sbt-mode/issues/152
    (setq sbt:program-options '("-Dsbt.supershell=false"))
 )
+
+;; configure the java mode
+(add-hook 'java-mode-hook (lambda ()
+                            (setq c-basic-offset 4
+                                  tab-width 4
+                                  indent-tabs-mode t)))
+
+
