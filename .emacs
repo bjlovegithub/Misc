@@ -90,10 +90,6 @@
 (global-set-key [M-s-left] (quote backward-global-mark))
 (global-set-key [M-s-right] (quote forward-global-mark))
 
-;; enable autopair in all buffers
-(require 'autopair)
-(autopair-global-mode)
-
 ;;    
 ;; INSTALL PACKAGES
 ;; --------------------------------------
@@ -155,16 +151,16 @@
 ;; PYTHON CONFIGURATION
 ;; --------------------------------------
 
-(elpy-enable)
-
 ;; use flycheck not flymake with elpy
-(when (require 'flycheck nil t)
-  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-  (add-hook 'elpy-mode-hook 'flycheck-mode))
+;(when (require 'flycheck nil t)
+;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
+;  (add-hook 'elpy-mode-hook 'flycheck-mode))
+'(flycheck-check-syntax-automatically (quote (save idle-change mode-enabled)))
+'(flycheck-idle-change-delay 1)
 
 ;; enable autopep8 formatting on save
-(require 'py-autopep8)
-(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
+;(require 'py-autopep8)
+;(add-hook 'elpy-mode-hook 'py-autopep8-enable-on-save)
 
 (require 'multi-web-mode)
 (setq mweb-default-major-mode 'html-mode)
@@ -232,8 +228,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   (quote
-    (dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+    (quote
+     (autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -380,4 +376,6 @@
                                   tab-width 4
                                   indent-tabs-mode t)))
 
-
+;; enable autopair in all buffers
+(require 'autopair)
+(autopair-global-mode)
