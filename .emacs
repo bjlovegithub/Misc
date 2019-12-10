@@ -1,8 +1,8 @@
 ;; ------------
 ;; Global conf
-;; ------------       
+;; ------------
 (add-to-list 'load-path "~/.emacs.d/lisp/")
-    
+
 (setq current-language-environment "UTF-8")
 (setq default-input-method "chinese-py")
 (setq locale-coding-system 'utf-8)
@@ -62,14 +62,14 @@
   (and (eq (marker-buffer marker) (current-buffer))
        (= (marker-position marker) (point))))
 
-(defun push-mark-maybe () 
+(defun push-mark-maybe ()
   "push mark onto `global-mark-ring' if mark head or tail is not current location"
   (if (not global-mark-ring) (error "global-mark-ring empty")
     (unless (or (marker-is-point-p (car global-mark-ring))
                 (marker-is-point-p (car (reverse global-mark-ring))))
       (push-mark))))
 
-(defun backward-global-mark () 
+(defun backward-global-mark ()
   "use `pop-global-mark', pushing current point if not on ring."
   (interactive)
   (push-mark-maybe)
@@ -90,10 +90,14 @@
 (global-set-key [M-s-left] (quote backward-global-mark))
 (global-set-key [M-s-right] (quote forward-global-mark))
 
-;;    
+(defun nuke_traling ()
+  (add-hook 'before-save-hook #'delete-trailing-whitespace nil t))
+(add-hook 'prog-mode-hook #'nuke_traling)
+
+;;
 ;; INSTALL PACKAGES
 ;; --------------------------------------
-;;    
+;;
 
 (require 'package)
 (setq package-archives '(("gnu" . "http://mirrors.163.com/elpa/gnu/")
@@ -228,8 +232,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-    (quote
-     (autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+   (quote
+    (yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -242,7 +246,7 @@
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:complete-on-dot t)
 
-;; yasnippet
+;; yasnippet - remember to install the snippets yasnippet-snippets
 (require 'yasnippet)
 (yas-global-mode 1)
 
@@ -379,3 +383,4 @@
 ;; enable autopair in all buffers
 (require 'autopair)
 (autopair-global-mode)
+(show-paren-mode 1)
