@@ -333,6 +333,7 @@
         ("f" helm-imenu "Filter funcs/classes (Helm)")
         ("s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
         ("C-c" lsp-describe-session "Describe session")
+        ("a" lsp-java-add-import)
 
         ;; Flycheck
         ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck")))
@@ -429,7 +430,6 @@
           treemacs-display-in-side-window        t
           treemacs-eldoc-display                 t
           treemacs-file-event-delay              5000
-          treemacs-file-extension-regex          treemacs-last-period-regex-value
           treemacs-file-follow-delay             0.2
           treemacs-follow-after-init             t
           treemacs-git-command-pipe              ""
@@ -489,17 +489,31 @@
   :after treemacs projectile
   :ensure t)
 
-(use-package treemacs-icons-dired
-  :after treemacs dired
-  :ensure t
-  :config (treemacs-icons-dired-mode))
-
 (use-package treemacs-magit
   :after treemacs magit
   :ensure t)
-(treemacs 1)
 
 ;; set up the dap mode
 (require 'dap-java)
 ;;pip install "ptvsd>=4.2"
 (require 'dap-python)
+
+
+(defun fix-c-indent-offset-according-to-syntax-context (key val)
+  ;; remove the old element
+  (setq c-offsets-alist (delq (assoc key c-offsets-alist) c-offsets-alist))
+  ;; new value
+  (add-to-list 'c-offsets-alist '(key . val)))
+
+;; conf the indentation
+;; Java
+;; use C-c C-o to set offset
+;; use C-c C-s to show syntactic information (show the variable that needs to be set)
+(add-hook 'java-mode-hook (lambda ()
+                            (setq c-default-style "java")
+                            (c-set-offset 'arglist-intro '+)
+                            (c-set-offset 'arglist-close '0)
+                            (c-set-offset 'case-label '+)
+                            (display-line-numbers-mode 1)
+                            (auto-complete-mode t)
+                            ))
