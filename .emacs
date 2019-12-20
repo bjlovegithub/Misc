@@ -263,7 +263,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
     (quote
-     (counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+     (php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -293,24 +293,24 @@
 (require 'use-package)
 (use-package hydra)
 
-(use-package helm)
+;; (use-package helm)
 
-(use-package helm-lsp
-  :config
-  (defun netrom/helm-lsp-workspace-symbol-at-point ()
-    (interactive)
-    (let ((current-prefix-arg t))
-      (call-interactively #'helm-lsp-workspace-symbol)))
+;; (use-package helm-lsp
+;;   :config
+;;   (defun netrom/helm-lsp-workspace-symbol-at-point ()
+;;     (interactive)
+;;     (let ((current-prefix-arg t))
+;;       (call-interactively #'helm-lsp-workspace-symbol)))
 
-  (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
-    (interactive)
-    (let ((current-prefix-arg t))
-      (call-interactively #'helm-lsp-global-workspace-symbol))))
+;;   (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
+;;     (interactive)
+;;     (let ((current-prefix-arg t))
+;;       (call-interactively #'helm-lsp-global-workspace-symbol))))
 
 (require 'lsp-mode)
 (require 'hydra)
-(require 'helm)
-(require 'helm-lsp)
+;(require 'helm)
+;(require 'helm-lsp)
 (setq netrom--general-lsp-hydra-heads
       '(;; Xref
         ("d" xref-find-definitions "Definitions" :column "Xref")
@@ -342,6 +342,15 @@
       '(;; Misc
         ("q" nil "Cancel" :column "Misc")
         ("b" pop-tag-mark "Back")))
+
+'(lsp-enable-snippet nil)
+;'(lsp-ui-doc-delay 1)
+'(lsp-ui-doc-max-height 8)
+'(lsp-ui-sideline-delay 2)
+'(lsp-ui-sideline-show-code-actions nil)
+'(lsp-ui-sideline-show-hover nil)
+(setq lsp-print-performance t)
+(setq company-lsp-cache-candidates t)
 
 ;; Create general hydra.
 (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
@@ -514,6 +523,5 @@
                             (c-set-offset 'arglist-intro '+)
                             (c-set-offset 'arglist-close '0)
                             (c-set-offset 'case-label '+)
-                            (display-line-numbers-mode 1)
                             (auto-complete-mode t)
                             ))
