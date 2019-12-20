@@ -13,6 +13,9 @@
 (set-face-attribute 'default nil
                     :height 125 :weight 'normal)
 
+(global-eldoc-mode nil)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
 (autoload 'dired-jump "dired-x"
   "Jump to Dired buffer corresponding to current buffer." t)
 
@@ -344,13 +347,60 @@
         ("b" pop-tag-mark "Back")))
 
 '(lsp-enable-snippet nil)
-;'(lsp-ui-doc-delay 1)
-'(lsp-ui-doc-max-height 8)
+'(lsp-ui-doc-delay 1)
+'(lsp-ui-doc-max-height 30)
 '(lsp-ui-sideline-delay 2)
 '(lsp-ui-sideline-show-code-actions nil)
 '(lsp-ui-sideline-show-hover nil)
+'(lsp-ui-doc-background "#61AFEF")
 (setq lsp-print-performance t)
 (setq company-lsp-cache-candidates t)
+
+(use-package lsp-ui
+  :after (lsp)
+  :init
+  (setf lsp-ui-sideline-enable nil)
+  (when (require 'xwidget nil 'noerror)
+    (setf lsp-ui-doc-use-webkit t))
+  (when lsp-ui-doc-use-webkit
+    (setf lsp-ui-doc-enable t)
+    (setf lsp-ui-doc-position 'at-point)
+    (setf lsp-ui-doc-header nil)
+    (setf lsp-ui-doc-include-signature t))
+  :config
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
+  (add-hook 'lsp-after-open-hook #'lsp-ui-mode))
+
+(lsp-ui-doc--delete-frame)
+(custom-set-faces '(nobreak-space ((t nil))))
+'(lsp-ui-doc-use-childframe t)
+'(lsp-ui-doc-use-webkit t)
+
+(setq-default lsp-ui-doc-frame-parameters
+                '((left . -1)
+                  (top . -1)
+                  (no-accept-focus . t)
+                  (min-width . 0)
+                  (width . 0)
+                  (min-height . 0)
+                  (height . 0)
+                  (internal-border-width . 0)
+                  (vertical-scroll-bars)
+                  (horizontal-scroll-bars)
+                  (left-fringe . 0)
+                  (right-fringe . 0)
+                  (menu-bar-lines . 0)
+                  (tool-bar-lines . 0)
+                  (line-spacing . 0.1)
+                  (unsplittable . t)
+                  (undecorated . t)
+                  (minibuffer . nil)
+                  (visibility . nil)
+                  (mouse-wheel-frame . nil)
+                  (no-other-frame . t)
+                  (cursor-type)
+                  (no-special-glyphs . t)))
 
 ;; Create general hydra.
 (eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
@@ -437,7 +487,6 @@
     (setq treemacs-collapse-dirs                 (if treemacs-python-executable 3 0)
           treemacs-deferred-git-apply-delay      0.5
           treemacs-display-in-side-window        t
-          treemacs-eldoc-display                 t
           treemacs-file-event-delay              5000
           treemacs-file-follow-delay             0.2
           treemacs-follow-after-init             t
