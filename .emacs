@@ -13,7 +13,6 @@
 (set-face-attribute 'default nil
                     :height 125 :weight 'normal)
 
-(global-eldoc-mode nil)
 (add-to-list 'default-frame-alist '(fullscreen . maximized))
 
 (autoload 'dired-jump "dired-x"
@@ -114,7 +113,7 @@
 (defvar myPackages
   '(ein
     ;;elpy
-    jedi
+    ;jedi
     flycheck
     ;;material-theme
     yasnippet
@@ -276,8 +275,8 @@
 
 
 ;; remember to run Run M-x jedi:install-server RET during installation.
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
+;(add-hook 'python-mode-hook 'jedi:setup)
+;(setq jedi:complete-on-dot t)
 
 ;; yasnippet - remember to install the snippets yasnippet-snippets
 (require 'yasnippet)
@@ -364,7 +363,7 @@
     (setf lsp-ui-doc-use-webkit t))
   (when lsp-ui-doc-use-webkit
     (setf lsp-ui-doc-enable t)
-    (setf lsp-ui-doc-position 'at-point)
+    (setf lsp-ui-doc-position 'at-top)
     (setf lsp-ui-doc-header nil)
     (setf lsp-ui-doc-include-signature t))
   :config
@@ -574,3 +573,5 @@
                             (c-set-offset 'case-label '+)
                             (auto-complete-mode t)
                             ))
+
+(global-eldoc-mode -1)
