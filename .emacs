@@ -28,6 +28,10 @@
 (global-font-lock-mode t)
 (column-number-mode t)
 
+(when (eq system-type 'darwin)
+  (require 'ls-lisp)
+  (setq ls-lisp-use-insert-directory-program nil))
+
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 2)
 (setq-default js2-basic-offset 2)
@@ -38,7 +42,6 @@
 
 (define-key global-map (kbd "RET") 'newline-and-indent)
 (define-key global-map (kbd "C-j") 'newline-and-indent)
-
 
 ;; Set cursor and mouse-pointer colours
 ;(set-cursor-color "green")
@@ -143,6 +146,8 @@
     treemacs
     dap-mode
     counsel-etags
+    doom-themes
+    indent-guide
     exec-path-from-shell))
 
 (mapc #'(lambda (package)
@@ -265,13 +270,13 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
     (quote
-     (php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+     (indent-guide doom-themes php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(nobreak-space ((t nil))))
 
 
 ;; remember to run Run M-x jedi:install-server RET during installation.
@@ -320,6 +325,7 @@
         ("r" xref-find-references "References")
         ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
         ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+        ("C-f" helm-projectile-find-file "Helm File Search")
 
         ;; Peek
         ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
@@ -372,7 +378,7 @@
   (add-hook 'lsp-after-open-hook #'lsp-ui-mode))
 
 (lsp-ui-doc--delete-frame)
-(custom-set-faces '(nobreak-space ((t nil))))
+
 '(lsp-ui-doc-use-childframe t)
 '(lsp-ui-doc-use-webkit t)
 
@@ -575,3 +581,17 @@
                             ))
 
 (global-eldoc-mode -1)
+
+;;; for doom-theme. from: http://www.mycpu.org/emacs-productivity-setup/
+(use-package doom-themes)
+(require 'doom-themes)
+(require 'indent-guide)
+(indent-guide-global-mode)
+(set-face-background 'indent-guide-face "dimgray")
+(setq doom-themes-enable-bold t
+      doom-themes-enable-italic t)
+(load-theme 'doom-molokai t)
+(doom-themes-visual-bell-config)
+(doom-themes-neotree-config)
+(require 'doom-modeline)
+(doom-modeline-mode 1)
