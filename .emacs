@@ -148,6 +148,8 @@
     counsel-etags
     doom-themes
     indent-guide
+    doom-modeline
+    sphinx-doc
     exec-path-from-shell))
 
 (mapc #'(lambda (package)
@@ -165,10 +167,9 @@
 ;; PYTHON CONFIGURATION
 ;; --------------------------------------
 
-;; use flycheck not flymake with elpy
-;(when (require 'flycheck nil t)
-;  (setq elpy-modules (delq 'elpy-module-flymake elpy-modules))
-;  (add-hook 'elpy-mode-hook 'flycheck-mode))
+;; flycheck
+(use-package flycheck
+  :init (global-flycheck-mode))
 '(flycheck-check-syntax-automatically (quote (save idle-change mode-enabled)))
 '(flycheck-idle-change-delay 1)
 
@@ -269,8 +270,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-    (quote
-     (indent-guide doom-themes php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+   (quote
+    (indent-guide doom-themes php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -291,6 +292,7 @@
 (require 'lsp-clients)
 ;; pip install python-language-server to get the server
 (add-hook 'python-mode-hook #'lsp)
+(add-hook 'python-mode-hook 'flycheck-mode)
 (add-hook 'java-mode-hook #'lsp)
 (add-hook 'java-mode-hook 'flycheck-mode)
 (add-hook 'java-mode-hook 'company-mode)
@@ -300,21 +302,20 @@
 (require 'use-package)
 (use-package hydra)
 
-;; (use-package helm)
+(use-package helm)
+(use-package helm-lsp
+  :config
+  (defun netrom/helm-lsp-workspace-symbol-at-point ()
+    (interactive)
+    (let ((current-prefix-arg t))
+      (call-interactively #'helm-lsp-workspace-symbol)))
 
-;; (use-package helm-lsp
-;;   :config
-;;   (defun netrom/helm-lsp-workspace-symbol-at-point ()
-;;     (interactive)
-;;     (let ((current-prefix-arg t))
-;;       (call-interactively #'helm-lsp-workspace-symbol)))
+  (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
+    (interactive)
+    (let ((current-prefix-arg t))
+      (call-interactively #'helm-lsp-global-workspace-symbol))))
 
-;;   (defun netrom/helm-lsp-global-workspace-symbol-at-point ()
-;;     (interactive)
-;;     (let ((current-prefix-arg t))
-;;       (call-interactively #'helm-lsp-global-workspace-symbol))))
-
-(require 'lsp-mode)
+(use-package lsp-ui)
 (require 'hydra)
 ;(require 'helm)
 ;(require 'helm-lsp)
@@ -339,12 +340,13 @@
         ("t" lsp-goto-type-definition "Type definition")
         ("i" lsp-goto-implementation "Implementation")
         ("f" helm-imenu "Filter funcs/classes (Helm)")
-        ("s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
+        ("C-s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
         ("C-c" lsp-describe-session "Describe session")
         ("a" lsp-java-add-import)
 
         ;; Flycheck
-        ("l" lsp-ui-flycheck-list "List errs/warns/notes" :column "Flycheck")))
+        ("c" flycheck-select-checker "Select checkers" :column "Flycheck")
+        ("l" flycheck-list-errors "List errs/warns/notes" :column "Flycheck")))
 
 (setq netrom--misc-lsp-hydra-heads
       '(;; Misc
@@ -364,18 +366,21 @@
 (use-package lsp-ui
   :after (lsp)
   :init
-  (setf lsp-ui-sideline-enable nil)
+  (setf lsp-ui-sideline-enable t)
   (when (require 'xwidget nil 'noerror)
     (setf lsp-ui-doc-use-webkit t))
   (when lsp-ui-doc-use-webkit
     (setf lsp-ui-doc-enable t)
-    (setf lsp-ui-doc-position 'at-top)
     (setf lsp-ui-doc-header nil)
     (setf lsp-ui-doc-include-signature t))
   :config
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
-  (add-hook 'lsp-after-open-hook #'lsp-ui-mode))
+  (add-hook 'lsp-after-open-hook #'lsp-ui-mode)
+  (add-hook 'lsp-after-initialize-hook (lambda
+                                         ()
+                                         (flycheck-add-next-checker 'lsp-ui 'python-flake8)))
+)
 
 (lsp-ui-doc--delete-frame)
 
@@ -383,9 +388,7 @@
 '(lsp-ui-doc-use-webkit t)
 
 (setq-default lsp-ui-doc-frame-parameters
-                '((left . -1)
-                  (top . -1)
-                  (no-accept-focus . t)
+                '((no-accept-focus . t)
                   (min-width . 0)
                   (width . 0)
                   (min-height . 0)
@@ -453,7 +456,6 @@
   ;; Optional - enable lsp-mode automatically in scala files
   :hook (scala-mode . lsp)
   :config (setq lsp-prefer-flymake nil))
-(use-package lsp-ui)
 (use-package company-lsp)
 
 (use-package sbt-mode
@@ -577,7 +579,7 @@
                             (c-set-offset 'arglist-intro '+)
                             (c-set-offset 'arglist-close '0)
                             (c-set-offset 'case-label '+)
-                            (auto-complete-mode t)
+                            ;;(auto-complete-mode t)
                             ))
 
 (global-eldoc-mode -1)
@@ -596,3 +598,8 @@
 (doom-themes-neotree-config)
 (require 'doom-modeline)
 (doom-modeline-mode 1)
+
+;;; python doc
+(add-hook 'python-mode-hook (lambda ()
+                              (require 'sphinx-doc)
+                              (sphinx-doc-mode t)))
