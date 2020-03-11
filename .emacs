@@ -366,7 +366,7 @@
 (use-package lsp-ui
   :after (lsp)
   :init
-  (setf lsp-ui-sideline-enable t)
+  (setf lsp-ui-sideline-enable nil)
   (when (require 'xwidget nil 'noerror)
     (setf lsp-ui-doc-use-webkit t))
   (when lsp-ui-doc-use-webkit
@@ -377,6 +377,7 @@
   (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
   (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references)
   (add-hook 'lsp-after-open-hook #'lsp-ui-mode)
+
   (add-hook 'lsp-after-initialize-hook (lambda
                                          ()
                                          (flycheck-add-next-checker 'lsp-ui 'python-flake8)))
@@ -388,7 +389,7 @@
 '(lsp-ui-doc-use-webkit t)
 
 (setq-default lsp-ui-doc-frame-parameters
-                '((no-accept-focus . t)
+                '((no-accept-focus . nil)
                   (min-width . 0)
                   (width . 0)
                   (min-height . 0)
