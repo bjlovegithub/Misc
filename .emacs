@@ -585,7 +585,6 @@
 
 (global-eldoc-mode -1)
 
-
 ;;; for doom-theme. from: http://www.mycpu.org/emacs-productivity-setup/
 (use-package doom-themes)
 (require 'doom-themes)
