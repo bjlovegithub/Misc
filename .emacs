@@ -150,12 +150,17 @@
     indent-guide
     doom-modeline
     sphinx-doc
+    quickrun
     exec-path-from-shell))
 
 (mapc #'(lambda (package)
     (unless (package-installed-p package)
       (package-install package)))
       myPackages)
+
+;;; quickrun cmd
+(use-package quickrun)
+(require 'quickrun)
 
 ;; BASIC CUSTOMIZATION
 ;; --------------------------------------
@@ -344,10 +349,12 @@
         ("C-c" lsp-describe-session "Describe session")
         ("a" lsp-java-add-import)
 
-        ;; Flycheck
-        ("c" flycheck-select-checker "Select checkers" :column "Flycheck")
-        ("l" flycheck-list-errors "List errs/warns/notes" :column "Flycheck")))
-
+        ;; Tools
+        ("c" flycheck-select-checker "Select checkers" :column "Tools")
+        ("l" flycheck-list-errors "List errs/warns/notes" :column "Tools")
+        ("C-q" quickrun "Quick run the cmd" :column "Tools")
+        )
+      )
 (setq netrom--misc-lsp-hydra-heads
       '(;; Misc
         ("q" nil "Cancel" :column "Misc")
@@ -584,6 +591,7 @@
                             ))
 
 (global-eldoc-mode -1)
+
 
 ;;; for doom-theme. from: http://www.mycpu.org/emacs-productivity-setup/
 (use-package doom-themes)
