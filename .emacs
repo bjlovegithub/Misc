@@ -353,6 +353,7 @@
         ("c" flycheck-select-checker "Select checkers" :column "Tools")
         ("l" flycheck-list-errors "List errs/warns/notes" :column "Tools")
         ("C-q" quickrun "Quick run the cmd" :column "Tools")
+        ;("C-q C-a" quickrun-with-arg "Quick run the cmd with arg" :column "Tools")
         )
       )
 (setq netrom--misc-lsp-hydra-heads
@@ -360,7 +361,7 @@
         ("q" nil "Cancel" :column "Misc")
         ("b" pop-tag-mark "Back")))
 
-'(lsp-enable-snippet nil)
+'(lsp-enable-snippet t)
 '(lsp-ui-doc-delay 1)
 '(lsp-ui-doc-max-height 30)
 '(lsp-ui-sideline-delay 2)
@@ -377,7 +378,7 @@
   (when (require 'xwidget nil 'noerror)
     (setf lsp-ui-doc-use-webkit t))
   (when lsp-ui-doc-use-webkit
-    (setf lsp-ui-doc-enable t)
+    (setf lsp-ui-doc-enable nil)
     (setf lsp-ui-doc-header nil)
     (setf lsp-ui-doc-include-signature t))
   :config
@@ -604,8 +605,8 @@
 (load-theme 'doom-molokai t)
 (doom-themes-visual-bell-config)
 (doom-themes-neotree-config)
-(require 'doom-modeline)
-(doom-modeline-mode 1)
+;(require 'doom-modeline)
+;(doom-modeline-mode 1)
 
 ;;; python doc
 (add-hook 'python-mode-hook (lambda ()
