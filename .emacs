@@ -177,6 +177,9 @@
   :init (global-flycheck-mode))
 '(flycheck-check-syntax-automatically (quote (save idle-change mode-enabled)))
 '(flycheck-idle-change-delay 1)
+(global-flycheck-mode 1)
+(with-eval-after-load 'flycheck
+  (add-hook 'flycheck-mode-hook #'flycheck-pycheckers-setup))
 
 ;; enable autopep8 formatting on save
 ;(require 'py-autopep8)
@@ -276,7 +279,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (indent-guide doom-themes php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
+    (flycheck-pycheckers lsp-treemacs lsp-intellij lsp-java lsp-ui lsp-scala protobuf-mode indent-guide doom-themes php-mode counsel-etags treemacs-magit treemacs-icons-dired treemacs-projectile treemacs-evil yasnippet-snippets autopair dockerfile-mode helm use-package lsp-mode company-tern xref-js2 js2-refactor multi-web-mode py-autopep8 flycheck elpy ein better-defaults yaml-mode go-mode rjsx-mode js-auto-beautify jupyter jsx-mode))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -353,6 +356,7 @@
         ("c" flycheck-select-checker "Select checkers" :column "Tools")
         ("l" flycheck-list-errors "List errs/warns/notes" :column "Tools")
         ("C-q" quickrun "Quick run the cmd" :column "Tools")
+        ("C-l" lsp-ui-imenu "Quick imenu" :column "Tools")
         ;("C-q C-a" quickrun-with-arg "Quick run the cmd with arg" :column "Tools")
         )
       )
@@ -388,7 +392,7 @@
 
   (add-hook 'lsp-after-initialize-hook (lambda
                                          ()
-                                         (flycheck-add-next-checker 'lsp-ui 'python-flake8)))
+                                         (flycheck-add-next-checker 'lsp 'python-flake8)))
 )
 
 (lsp-ui-doc--delete-frame)
