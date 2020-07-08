@@ -129,7 +129,6 @@
     company
     company-tern
     magit
-    flymake
     lsp-mode
     company-lsp
     lsp-ui
@@ -167,7 +166,7 @@
 
 (setq inhibit-startup-message t) ;; hide the startup message
 ;;(load-theme 'material t) ;; load material theme
-(global-linum-mode t) ;; enable line numbers globally
+;;(global-linum-mode t) ;; enable line numbers globally
 
 ;; PYTHON CONFIGURATION
 ;; --------------------------------------
@@ -467,8 +466,7 @@
     ("scala" . scala-mode))
 (use-package lsp-mode
   ;; Optional - enable lsp-mode automatically in scala files
-  :hook (scala-mode . lsp)
-  :config (setq lsp-prefer-flymake nil))
+  :hook (scala-mode . lsp))
 (use-package company-lsp)
 
 (use-package sbt-mode
@@ -616,3 +614,13 @@
 (add-hook 'python-mode-hook (lambda ()
                               (require 'sphinx-doc)
                               (sphinx-doc-mode t)))
+
+;;; enable auto rescan for imenu
+(setq imenu-auto-rescan t
+      imenu-auto-rescan-maxout (* 1024 1024)
+      imenu--rescan-item '("" . -99))
+
+(add-hook 'pyhon-mode-local-vars-hook
+          (lambda ()
+            (when (flycheck-may-enable-checker 'python-flake8)
+              (flycheck-select-checker 'python-flake8))))
