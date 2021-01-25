@@ -1,0 +1,261 @@
+;; ------------
+;; Global conf
+;; ------------
+(add-to-list 'load-path "~/.emacs.d/lisp/")
+
+(setq current-language-environment "UTF-8")
+(setq default-input-method "chinese-py")
+(setq locale-coding-system 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+(set-selection-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
+(set-face-attribute 'default nil
+                    :height 125 :weight 'normal)
+
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
+
+(autoload 'dired-jump "dired-x"
+  "Jump to Dired buffer corresponding to current buffer." t)
+
+(fset 'yes-or-no-p 'y-or-n-p)
+(iswitchb-mode 1)
+(global-set-key "\C-x\C-j" 'dired-jump)
+(global-set-key [f11] 'compile)
+(global-set-key "\M-p" 'goto-line)
+(setq bookmark-save-flag 1)
+(global-set-key "\C-x\M-i" 'bs-show)
+(global-font-lock-mode t)
+(column-number-mode t)
+
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 2)
+(setq-default js2-basic-offset 2)
+(setq-default c-basic-offset 2)
+(setq indent-line-function 'insert-tab)
+
+(setq make-backup-files nil)
+
+(define-key global-map (kbd "RET") 'newline-and-indent)
+(define-key global-map (kbd "C-j") 'newline-and-indent)
+
+
+;; Set cursor and mouse-pointer colours
+;(set-cursor-color "green")
+;(set-mouse-color "green")
+
+;; Set region background colour
+(set-face-background 'region "blue")
+
+;; Set emacs background colour
+(set-background-color "black")
+
+(set-foreground-color "white")
+; (tool-bar-mode -1)
+
+;; INSTALL PACKAGES
+;; --------------------------------------
+
+(require 'package)
+(add-to-list 'package-archives
+       '("melpa" . "https://melpa.org/packages/") t)
+
+;; activate all packages
+(package-initialize)
+
+;; fetch the list of packages available 
+(unless package-archive-contents
+  (package-refresh-contents))
+
+;; define list of packages to install
+(defvar myPackages
+  '(better-defaults
+    material-theme
+    exec-path-from-shell
+    lsp-mode
+    lsp-ui
+    use-package
+    helm-lsp
+    lsp-ivy
+    lsp-treemacs
+    which-key
+    company
+    lsp-python-ms
+    lsp-jedi
+    hydra
+    flycheck
+    magit
+    ))
+
+;; install all packages in list
+(mapc #'(lambda (package)
+    (unless (package-installed-p package)
+      (package-install package)))
+      myPackages)
+
+;; Use shell's $PATH
+(exec-path-from-shell-copy-env "PATH")
+
+;; init.el ends here
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   '(pyenv-mode elpy exec-path-from-shell material-theme better-defaults)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+;; BASIC CUSTOMIZATION
+;; --------------------------------------
+
+(setq inhibit-startup-message t)   ;; hide the startup message
+(load-theme 'material t)           ;; load material theme
+(global-linum-mode t)              ;; enable line numbers globally
+(setq linum-format "%4d \u2502 ")  ;; format line number spacing
+;; Allow hash to be entered  
+(global-set-key (kbd "M-3") '(lambda () (interactive) (insert "#")))
+
+
+;; lsp-mode configuration
+;; --------------------------------------
+(use-package lsp-mode
+  :config
+  (setq lsp-idle-delay 0.01
+        lsp-enable-symbol-highlighting t
+        lsp-enable-snippet nil
+        lsp-lens-enable t
+        lsp-treemacs-sync-mode t
+        lsp-eldoc-enable-hover t
+        lsp-modeline-diagnostics-enable t
+        lsp-signature-auto-activate t
+        lsp-completion-show-detail t
+        lsp-completion-show-kind t
+        lsp-modeline-code-actions-enable t
+        lsp-headerline-breadcrumb-enable t
+        lsp-pyls-plugins-flake8-enabled t)
+  (lsp-register-custom-settings
+   '(("pyls.plugins.pyls_mypy.enabled" t t)
+     ("pyls.plugins.pyls_mypy.live_mode" nil t)
+     ("pyls.plugins.pyls_black.enabled" t t)
+     ("pyls.plugins.pyls_isort.enabled" t t)
+
+     ;; Disable these as they're duplicated by flake8
+     ("pyls.plugins.pycodestyle.enabled" nil t)
+     ("pyls.plugins.mccabe.enabled" nil t)
+     ("pyls.plugins.pyflakes.enabled" nil t)))
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+         (python-mode . lsp)
+         (java-mode . lsp)
+         ;; if you want which-key integration
+         (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+;; optionally
+(use-package lsp-ui
+  :requires flycheck
+  :config
+  (setq lsp-ui-sideline-show-hover t
+        lsp-ui-sideline-delay 0.1
+        lsp-ui-sideline-enable t
+        lsp-ui-doc-delay 2
+        lsp-ui-sideline-ignore-duplicates t
+        lsp-ui-doc-enable t
+        lsp-ui-doc-position 'bottom
+        lsp-ui-doc-alignment 'frame
+        lsp-ui-doc-header nil
+        lsp-ui-doc-show-with-cursor t
+        lsp-ui-doc-include-signature t
+        lsp-ui-peek-enable t
+        lsp-ui-doc-use-childframe t)
+  :config
+  (flycheck-define-generic-checker
+   'lsp
+   :start #'lsp-diagnostics--flycheck-start
+   :modes '(lsp-placeholder-mode) ;; placeholder
+   :predicate (lambda () lsp-mode)
+   :error-explainer (lambda (e)
+                      (cond ((string-prefix-p "clang-tidy" (flycheck-error-message e))
+                             (lsp-cpp-flycheck-clang-tidy-error-explainer e))
+                            (t (flycheck-error-message e)))))
+  :commands lsp-ui-mode)
+;; if you are helm user
+(use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; if you are ivy user
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+
+;; optional if you want which-key integration
+(use-package which-key
+  :config
+  (which-key-mode))
+
+
+;; configure the hydra shortcut
+;; -------------------------------------
+(require 'hydra)
+(setq netrom--general-lsp-hydra-heads
+      '(;; Xref
+        ("d" xref-find-definitions "Definitions" :column "Xref")
+        ("D" xref-find-definitions-other-window "-> other win")
+        ("r" xref-find-references "References")
+        ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+        ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+        ("C-f" helm-projectile-find-file "Helm File Search")
+
+        ;; Peek
+        ("C-d" lsp-ui-peek-find-definitions "Definitions" :column "Peek")
+        ("C-r" lsp-ui-peek-find-references "References")
+        ("C-i" lsp-ui-peek-find-implementation "Implementation")
+
+        ;; LSP
+        ("p" lsp-describe-thing-at-point "Describe at point" :column "LSP")
+        ("C-a" lsp-execute-code-action "Execute code action")
+        ("R" lsp-rename "Rename")
+        ("t" lsp-goto-type-definition "Type definition")
+        ("i" lsp-goto-implementation "Implementation")
+        ("f" helm-imenu "Filter funcs/classes (Helm)")
+        ("C-s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
+        ("C-c" lsp-describe-session "Describe session")
+        ("a" lsp-java-add-import)
+
+        ;; Tools
+        ("c" flycheck-select-checker "Select checkers" :column "Tools")
+        ("l" flycheck-list-errors "List errs/warns/notes" :column "Tools")
+        ("C-q" quickrun "Quick run the cmd" :column "Tools")
+        ("C-l" lsp-ui-imenu "Quick imenu" :column "Tools")
+        ;("C-q C-a" quickrun-with-arg "Quick run the cmd with arg" :column "Tools")
+        )
+      )
+(setq netrom--misc-lsp-hydra-heads
+      '(;; Misc
+        ("q" nil "Cancel" :column "Misc")
+        ("b" pop-tag-mark "Back")))
+
+(eval `(defhydra netrom/lsp-hydra (:color blue :hint nil)
+         ,@(append
+            netrom--general-lsp-hydra-heads
+            netrom--misc-lsp-hydra-heads)))
+
+(add-hook 'lsp-mode-hook
+          (lambda () (local-set-key (kbd "C-c C-l") 'netrom/lsp-hydra/body)))
+
+
+;; python
+;; ---------------------------------------
+(use-package lsp-python-ms
+  :ensure t
+  :init (setq lsp-python-ms-auto-install-server t)
+  :hook (python-mode . (lambda ()
+                          (require 'lsp-python-ms)
+                          (lsp))))
+(put 'downcase-region 'disabled nil)
