@@ -51,7 +51,10 @@
 (set-background-color "black")
 
 (set-foreground-color "white")
-; (tool-bar-mode -1)
+;; (tool-bar-mode -1)
+
+(add-hook 'before-save-hook 'delete-trailing-whitespace)
+
 
 ;; INSTALL PACKAGES
 ;; --------------------------------------
@@ -63,7 +66,7 @@
 ;; activate all packages
 (package-initialize)
 
-;; fetch the list of packages available 
+;; fetch the list of packages available
 (unless package-archive-contents
   (package-refresh-contents))
 
@@ -88,6 +91,7 @@
     lsp-jedi
     hydra
     flycheck
+    pyenv-mode
     magit
     autopair
     major-mode-hydra
@@ -109,7 +113,8 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(pyenv-mode elpy exec-path-from-shell material-theme better-defaults)))
+   '(pyenv-mode elpy exec-path-from-shell material-theme better-defaults))
+ '(safe-local-variable-values '((encoding . utf-8))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -125,7 +130,7 @@
 (load-theme 'material t)           ;; load material theme
 (global-linum-mode t)              ;; enable line numbers globally
 (setq linum-format "%4d \u2502 ")  ;; format line number spacing
-;; Allow hash to be entered  
+;; Allow hash to be entered
 (global-set-key (kbd "M-3") '(lambda () (interactive) (insert "#")))
 ;; autopair
 (require 'autopair)
@@ -208,86 +213,20 @@
   :config
   (which-key-mode))
 
-
-;; configure the hydra shortcut
-;; -------------------------------------
-(use-package hydra
-  :bind (("C-c C-f" . hydra-flycheck/body)
-         ("C-c C-l" . hydra-lsp/body)
-         ("C-c C-c" . hydra-common/body)))
-(use-package major-mode-hydra
-  :after hydra
-  :preface
-  (defun with-alltheicon (icon str &optional height v-adjust)
-    "Displays an icon from all-the-icon."
-    (s-concat (all-the-icons-alltheicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
-
-  (defun with-fileicon (icon str &optional height v-adjust)
-    "Displays an icon from the Atom File Icons package."
-    (s-concat (all-the-icons-fileicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
-
-  (defun with-octicon (icon str &optional height v-adjust)
-    "Displays an icon from the GitHub Octicons."
-    (s-concat (all-the-icons-octicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str)))
-
-(pretty-hydra-define hydra-flycheck
-  (:hint nil :color amaranth :quit-key "q" :title "Flycheck")
-  ("Checker"
-   (("?" flycheck-describe-checker "describe")
-    ("d" flycheck-disable-checker "disable")
-    ("m" flycheck-mode "mode")
-    ("s" flycheck-select-checker "select"))
-   "Errors"
-   (("<" flycheck-previous-error "previous" :color pink)
-    (">" flycheck-next-error "next" :color pink)
-    ("f" flycheck-buffer "check")
-    ("l" flycheck-list-errors "list"))
-   "Other"
-   (("M" flycheck-manual "manual")
-    ("v" flycheck-verify-setup "verify setup"))))
-
-(pretty-hydra-define hydra-lsp
-  (:hint nil :color amaranth :quit-key "q" :title "LSP")
-  ("Def/Ref"
-   (("p" lsp-describe-thing-at-point "Describe at point")
-    ("d" xref-find-definitions "Definitions")
-    ("D" xref-find-definitions-other-window "-> other win")
-    ("C-d" lsp-ui-peek-find-definitions "Definitions")
-    ("r" xref-find-references "References")
-    ("C-r" lsp-ui-peek-find-references "References")
-    ("C-i" lsp-ui-peek-find-implementation "Implementation")
-    ("t" lsp-goto-type-definition "Type definition")
-    ("i" lsp-goto-implementation "Implementation"))
-   "Search"
-   (("C-s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
-    ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
-    ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
-    ("C-f" helm-projectile-find-file "Helm File Search"))
-   "Imenu"
-   (("f" helm-imenu "Filter funcs/classes (Helm)")
-    ("C-l" lsp-ui-imenu "Quick imenu")
-    )
-   "Misc"
-   (("C-c" lsp-describe-session "Describe session")
-    ("a" lsp-java-add-import)
-    ("R" lsp-rename "Rename")
-    ("C-a" lsp-execute-code-action "Execute code action"))))
-
-(pretty-hydra-define hydra-common
-  (:hint nil :color amaranth :quit-key "q" :title "Common Tools")
-  ("Helm"
-   (("f" helm-find-files "find file")
-    ("m" magit "magit"))))
-
-
 ;; python
 ;; ---------------------------------------
+(use-package pyvenv
+  :ensure t
+  :init
+  (setenv "WORKON_HOME" "~/.pyenv/versions"))
+
 (use-package lsp-python-ms
   :ensure t
   :init (setq lsp-python-ms-auto-install-server t)
   :hook (python-mode . (lambda ()
-                          (require 'lsp-python-ms)
-                          (lsp))))
+                         (require 'lsp-python-ms)
+                         (pyvenv-mode t)
+                         (lsp))))
 (put 'downcase-region 'disabled nil)
 
 
@@ -372,3 +311,73 @@
         ("C-x t B"   . treemacs-bookmark)
         ("C-x t C-t" . treemacs-find-file)
         ("C-x t M-t" . treemacs-find-tag)))
+
+;; configure the hydra shortcut
+;; -------------------------------------
+(use-package hydra
+  :bind (("C-; C-f" . hydra-flycheck/body)
+         ("C-; C-l" . hydra-lsp/body)
+         ("C-; C-c" . hydra-common/body)))
+(use-package major-mode-hydra
+  :after hydra
+  :preface
+  (defun with-alltheicon (icon str &optional height v-adjust)
+    "Displays an icon from all-the-icon."
+    (s-concat (all-the-icons-alltheicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
+
+  (defun with-fileicon (icon str &optional height v-adjust)
+    "Displays an icon from the Atom File Icons package."
+    (s-concat (all-the-icons-fileicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str))
+
+  (defun with-octicon (icon str &optional height v-adjust)
+    "Displays an icon from the GitHub Octicons."
+    (s-concat (all-the-icons-octicon icon :v-adjust (or v-adjust 0) :height (or height 1)) " " str)))
+
+(pretty-hydra-define hydra-flycheck
+  (:hint nil :color amaranth :quit-key "q" :title "Flycheck")
+  ("Checker"
+   (("?" flycheck-describe-checker "describe")
+    ("d" flycheck-disable-checker "disable")
+    ("m" flycheck-mode "mode")
+    ("s" flycheck-select-checker "select"))
+   "Errors"
+   (("<" flycheck-previous-error "previous" :color pink)
+    (">" flycheck-next-error "next" :color pink)
+    ("f" flycheck-buffer "check")
+    ("l" flycheck-list-errors "list"))
+   "Other"
+   (("M" flycheck-manual "manual")
+    ("v" flycheck-verify-setup "verify setup"))))
+
+(pretty-hydra-define hydra-lsp
+  (:hint nil :color amaranth :quit-key "q" :title "LSP" :exit t)
+  ("Def/Ref"
+   (("p" lsp-describe-thing-at-point "Describe at point")
+    ("d" xref-find-definitions "Definitions")
+    ("D" xref-find-definitions-other-window "-> other win")
+    ("C-d" lsp-ui-peek-find-definitions "Definitions")
+    ("r" xref-find-references "References")
+    ("C-r" lsp-ui-peek-find-references "References")
+    ("C-i" lsp-ui-peek-find-implementation "Implementation")
+    ("t" lsp-goto-type-definition "Type definition")
+    ("i" lsp-goto-implementation "Implementation"))
+   "Search"
+   (("C-s" lsp-ui-find-workspace-symbol "Find the symbol in the working space.")
+    ("s" netrom/helm-lsp-workspace-symbol-at-point "Helm search")
+    ("S" netrom/helm-lsp-global-workspace-symbol-at-point "Helm global search")
+    ("C-f" helm-projectile-find-file "Helm File Search"))
+   "Imenu"
+   (("f" helm-imenu "Filter funcs/classes (Helm)")
+    ("C-l" lsp-ui-imenu "Quick imenu")
+    )
+   "Misc"
+   (("C-c" lsp-describe-session "Describe session")
+    ("a" lsp-java-add-import)
+    ("R" lsp-rename "Rename")
+    ("C-a" lsp-execute-code-action "Execute code action"))))
+
+(pretty-hydra-define hydra-common
+  (:hint nil :color amaranth :quit-key "q" :title "Common Tools")
+  ("Helm"
+   (("f" helm-find-files "find file")
+    ("m" magit "magit"))))
